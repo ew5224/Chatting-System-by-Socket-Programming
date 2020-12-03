@@ -1,0 +1,16 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"> <head th:replace="fragments/header :: header" /> <body>
+<div class="container">
+    <div th:replace="fragments/bodyHeader :: bodyHeader"/>
+    <form th:action="@{/clientpage}" th:object="${form}" method="post"> <div class="form-group">
+        <div class="form-group">
+            <label th:for="price">Chat</label>
+            <input type="text" th:field="*{context}" class="form-control" placeholder="메세지를 입력하세요">
+        </div>
+</div>
+<button type="submit" class="btn btn-primary">전송</button> </form>
+<br/>
+<div th:replace="fragments/footer :: footer" />
+</div> <!-- /container -->
+</body>
+</html>
