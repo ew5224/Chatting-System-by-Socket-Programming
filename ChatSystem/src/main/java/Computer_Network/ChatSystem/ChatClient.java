@@ -1,7 +1,11 @@
 package Computer_Network.ChatSystem;
 
+import Computer_Network.ChatSystem.Repository.ChatRepository;
+import Computer_Network.ChatSystem.Service.ChatService;
 import com.sun.tools.jconsole.JConsoleContext;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
@@ -11,35 +15,48 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 @Service
 @Getter
+@RequiredArgsConstructor
 public class ChatClient {
 
     private String name;  //TODO 안 입력했을 때 튕겨나오게
     private String SERVER_IP;
     private int PORT;
     private String password;
+    private int clientid;
+
+    private List<String> chatDAO = new ArrayList<String>();
+
+    public Socket getSocket() {
+        return socket;
+    }
+
     private Socket socket;
 
-
-    public void connect(String name, String password, String SERVER_IP, int PORT) {
+    public ChatClient(String name, String password, String SERVER_IP, int PORT, int clientid){
         this.name = name;
         this.password = password;
         this.SERVER_IP = SERVER_IP;
         this.PORT = PORT;
+        this.clientid = clientid;
+    }
 
-        socket = new Socket();
+
+    public void connect() throws IOException {
+        ///socket = new Socket();
+        socket =new Socket();
         try {
-
-            socket.connect(new InetSocketAddress(SERVER_IP, PORT));
-            new ChatClientReceiveThread(socket);
+            socket.connect(new InetSocketAddress(SERVER_IP, 10001));
             consoleLog("채팅방에 입장하셨습니다.");
-
             PrintWriter pw = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8), true);
-            String request = "join :" + name + "\r\n";
+            String request = "join:" + name + "\r\n";
             pw.println(request);
+            new ChatClientReceiveThread(socket).start();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -54,6 +71,7 @@ public class ChatClient {
         try{
             pw = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8),true);
             pw.println(context);
+            ///chatRepository.getChatlist().add(context);
         }
         catch(IOException e){
             e.printStackTrace();
@@ -71,8 +89,7 @@ public class ChatClient {
                 BufferedReader br =new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
                 while(true){
                     String msg = br.readLine();
-                    ///textArea.append(msg);
-                    ///textArea.append("\n");
+                    chatDAO.add(msg);
                 }
             }catch (IOException e){
                 e.printStackTrace();
@@ -80,4 +97,3 @@ public class ChatClient {
         }
     }
 }
-

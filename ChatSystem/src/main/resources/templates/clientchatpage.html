@@ -2,9 +2,19 @@
 <html xmlns:th="http://www.thymeleaf.org"> <head th:replace="fragments/header :: header" /> <body>
 <div class="container">
     <div th:replace="fragments/bodyHeader :: bodyHeader"/>
-    <form th:action="@{/clientpage}" th:object="${form}" method="post"> <div class="form-group">
+    <form th:action="|/clientpage/${chatclientid}|" th:object="${form}" method="post"> <div class="form-group">
         <div class="form-group">
             <label th:for="price">Chat</label>
+            <p th:text="${chatclientid}"></p>
+
+            <table class="table table-striped">
+                <tbody>
+                    <tr th:each="context : ${chatlist}">
+                        <td th:text="${context}"></td>
+                    </tr>
+                </tbody>
+            </table>
+
             <input type="text" th:field="*{context}" class="form-control" placeholder="메세지를 입력하세요">
         </div>
 </div>
@@ -14,3 +24,4 @@
 </div> <!-- /container -->
 </body>
 </html>
+

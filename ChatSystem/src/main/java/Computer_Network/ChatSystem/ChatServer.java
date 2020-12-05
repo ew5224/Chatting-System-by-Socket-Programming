@@ -10,22 +10,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ChatServer {
+    static List<PrintWriter> listwriters= new ArrayList<>();
+    static List<String> userNames = new ArrayList<>();
 
     public static final int PORT= 10001;
 
     public static void main(String[] args) {
         ServerSocket serverSocket = null;
-        List<PrintWriter> listwriters= new ArrayList<>();
+
 
         try{
             String hostAddress = InetAddress.getLocalHost().getHostAddress();
             serverSocket = new ServerSocket(10001);
             consoleLog("연결 기다림");
 
+            ChatServerProcessThread chatServerProcessThread;
+
             //3.요청 대기
             while(true){
                 Socket socket = serverSocket.accept();
-                new ChatServerProcessThread(socket, listwriters).start();
+                new ChatServerProcessThread(socket).start();
                 System.out.println("new Room");
             }
 
@@ -41,23 +45,21 @@ public class ChatServer {
                 e.printStackTrace();
             }
         }
-
-
     }
-
     public static void consoleLog(String log){
         System.out.println("[server" + Thread.currentThread().getId() +"]"+log);
     }
 }
 
 class ChatServerProcessThread extends Thread{
-    private String nickname= null;
+    static List<String> nickname_list= new ArrayList<>();
     private Socket socket= null;
-    List<PrintWriter> listWriters = null;
+    static List<PrintWriter> listWriters = new ArrayList<>();
+    private String nickname;
 
-    public ChatServerProcessThread(Socket socket, List<PrintWriter> listWriters){
+
+    public ChatServerProcessThread(Socket socket){
         this.socket = socket;
-        this.listWriters = listWriters;
     }
 
     @Override
@@ -74,28 +76,31 @@ class ChatServerProcessThread extends Thread{
                     break;
                 }
 
-
                 String[] tokens = request.split(":");
                 System.out.println(request);
                 if("join".equals(tokens[0])){
+                    System.out.println("join run");
+                    nickname =tokens[1];
                     doJoin(tokens[1], printWriter);
                 }
                 else if("message".equals(tokens[0])){
+                    System.out.println("message run");
                     doMessage(tokens[1]);
                 }
                 else if("quit".equals(tokens[0])){
+                    System.out.println("quit run");
                     doQuit(printWriter);
                 }
 
             }
         }catch(IOException e){
-            consoleLog(this.nickname + "님이 채팅방을 나갔습니다");
+            consoleLog(nickname + "님이 채팅방을 나갔습니다");
         }
 
     }
 
     private void doMessage(String data){
-        broadcast(this.nickname + ":"+ data);
+        broadcast(data);
     }
 
     private void doQuit(PrintWriter writer){
@@ -117,20 +122,17 @@ class ChatServerProcessThread extends Thread{
                 writer.flush();
             }
         }
-
     }
     private void doJoin(String nickname, PrintWriter writer){
-        this.nickname = nickname;
+        nickname_list.add(nickname);
         String data = nickname + "님이 입장하셨습니다";
         broadcast(data);
         addWriter(writer);
     }
 
     private void addWriter(PrintWriter writer){
-        synchronized (listWriters){
             listWriters.add(writer);
         }
-    }
 
     public static void consoleLog(String log){
         System.out.println(log);

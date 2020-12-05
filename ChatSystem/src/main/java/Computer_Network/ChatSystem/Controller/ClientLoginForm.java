@@ -14,5 +14,4 @@ public class ClientLoginForm {
     private String password;
     private int Port;
     private String name;
-
 }
