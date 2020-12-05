@@ -11,10 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -49,22 +48,26 @@ public class ClientController {
     }
 
     @RequestMapping("/clientpage/{chatclientid}")
-    public String createChatPage(Model model, @PathVariable String chatclientid){
-        System.out.println("마지막에 들어오는 곳은 이곳");
-        model.addAttribute("form", new MessageForm());
-
+    public String createChatPage(Model model, @PathVariable String chatclientid) throws IOException {
+        System.out.println("여기서함");
         ChatClient chatclient = chatService.findOne(chatclientid);
+        model.addAttribute("form", new MessageForm());
         List<String> chatlist = chatclient.getChatDAO();
         model.addAttribute("chatlist", chatlist);
         return "clientchatpage";
     }
 
     @PostMapping("/clientpage/{chatclientid}")  ///TODO 채팅화면 + 파일전송 + 로그아웃
-    public String sendMessage(MessageForm messageForm, Model model, @PathVariable String chatclientid){
-        System.out.println("아니다 이곳이다");
+    public String sendMessage(@RequestParam("file") MultipartFile file,MessageForm messageForm, Model model, @PathVariable String chatclientid) throws IOException {
+        System.out.println("ㄴㄴ 여기서함");
+        ChatClient chatclient = chatService.findOne(chatclientid);
+        if(file!=null){
+            chatService.sendFile(chatclient, file);
+            return "redirect:/clientpage/"+chatclientid;
+        }
+        System.out.println("여기 오긴 하니?");
         String context = messageForm.getContext();
         context = "message:"+context;
-        ChatClient chatclient = chatService.findOne(chatclientid);
         chatService.sendMessage(chatclient, context);
         List<String> chatlist = chatclient.getChatDAO();
         model.addAttribute("chatlist", chatlist);

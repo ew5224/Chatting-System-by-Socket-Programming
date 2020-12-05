@@ -5,10 +5,9 @@ import Computer_Network.ChatSystem.Repository.ChatRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -34,6 +33,24 @@ public class ChatService {
             e.printStackTrace();
         }
     }
+
+    public void sendFile(ChatClient chatClient,MultipartFile file) throws IOException {
+        byte[] bytes = file.getBytes();
+        String rootPath = System.getProperty("catalina.home");
+        File dir = new File(rootPath + File.separator + "tmpFiles");
+        if (!dir.exists())
+            dir.mkdirs();
+
+        // Create the file on server
+        Socket socket = chatClient.getSocket();
+        File serverFile = new File(dir.getAbsolutePath()
+                + File.separator + "sendfile");
+        DataOutputStream dataOutputStream= new DataOutputStream(
+                socket.getOutputStream());
+        dataOutputStream.write(bytes);
+
+    }
+
     public ArrayList<String> getchatlist(){
         return chatRepository.getChatlist();
     }
