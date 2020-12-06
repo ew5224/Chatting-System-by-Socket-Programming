@@ -49,7 +49,6 @@ public class ClientController {
 
     @RequestMapping("/clientpage/{chatclientid}")
     public String createChatPage(Model model, @PathVariable String chatclientid) throws IOException {
-        System.out.println("여기서함");
         ChatClient chatclient = chatService.findOne(chatclientid);
         model.addAttribute("form", new MessageForm());
         List<String> chatlist = chatclient.getChatDAO();
@@ -59,13 +58,11 @@ public class ClientController {
 
     @PostMapping("/clientpage/{chatclientid}")  ///TODO 채팅화면 + 파일전송 + 로그아웃
     public String sendMessage(@RequestParam("file") MultipartFile file,MessageForm messageForm, Model model, @PathVariable String chatclientid) throws IOException {
-        System.out.println("ㄴㄴ 여기서함");
         ChatClient chatclient = chatService.findOne(chatclientid);
-        if(file!=null){
+        if(file.getSize()!=0){
             chatService.sendFile(chatclient, file);
             return "redirect:/clientpage/"+chatclientid;
         }
-        System.out.println("여기 오긴 하니?");
         String context = messageForm.getContext();
         context = "message:"+context;
         chatService.sendMessage(chatclient, context);

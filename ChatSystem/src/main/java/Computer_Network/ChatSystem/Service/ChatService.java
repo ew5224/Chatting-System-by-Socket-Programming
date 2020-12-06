@@ -45,9 +45,8 @@ public class ChatService {
         Socket socket = chatClient.getSocket();
         File serverFile = new File(dir.getAbsolutePath()
                 + File.separator + "sendfile");
-        DataOutputStream dataOutputStream= new DataOutputStream(
-                socket.getOutputStream());
-        dataOutputStream.write(bytes);
+        OutputStream outputStream = socket.getOutputStream();
+        outputStream.write(bytes);
 
     }
 

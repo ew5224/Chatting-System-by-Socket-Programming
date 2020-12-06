@@ -15,7 +15,9 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.sql.SQLOutput;
 import java.util.ArrayList;
+import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 
@@ -29,7 +31,6 @@ public class ChatClient {
     private int PORT;
     private String password;
     private int clientid;
-
     private List<String> chatDAO = new ArrayList<String>();
 
     public Socket getSocket() {
@@ -38,7 +39,7 @@ public class ChatClient {
 
     private Socket socket;
 
-    public ChatClient(String name, String password, String SERVER_IP, int PORT, int clientid){
+    public ChatClient(String name, String password, String SERVER_IP, int PORT, int clientid) {
         this.name = name;
         this.password = password;
         this.SERVER_IP = SERVER_IP;
@@ -49,7 +50,7 @@ public class ChatClient {
 
     public void connect() throws IOException {
         ///socket = new Socket();
-        socket =new Socket();
+        socket = new Socket();
         try {
             socket.connect(new InetSocketAddress(SERVER_IP, 10001));
             consoleLog("채팅방에 입장하셨습니다.");
@@ -57,41 +58,72 @@ public class ChatClient {
             String request = "join:" + name + "\r\n";
             pw.println(request);
             new ChatClientReceiveThread(socket).start();
+            new ChatClientFileReceiveThread(socket).start();
 
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-    public static void consoleLog(String log){
+
+    public static void consoleLog(String log) {
         System.out.println(log);
     }
 
-    public void sendMessage(String context){
+    public void sendMessage(String context) {
         PrintWriter pw;
-        try{
-            pw = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8),true);
+        try {
+            pw = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8), true);
             pw.println(context);
             ///chatRepository.getChatlist().add(context);
-        }
-        catch(IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public class ChatClientReceiveThread extends Thread{
+    public class ChatClientReceiveThread extends Thread {
         Socket socket;
-        ChatClientReceiveThread(Socket socket){
-            this.socket =socket;
+
+        ChatClientReceiveThread(Socket socket) {
+            this.socket = socket;
         }
 
-        public void run(){
-            try{
-                BufferedReader br =new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
-                while(true){
+        public void run() {
+            try {
+                BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
+                while (true) {
                     String msg = br.readLine();
+                    System.out.println(msg);
                     chatDAO.add(msg);
                 }
-            }catch (IOException e){
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public class ChatClientFileReceiveThread extends Thread {
+        Socket socket;
+
+        ChatClientFileReceiveThread(Socket socket) {
+            this.socket = socket;
+        }
+        int chunkSize = 1024;
+        byte[] bytes = new byte[chunkSize];
+
+        public void run() {
+            try {
+                while(true) {
+                    FileOutputStream fos = new FileOutputStream("/Users/roddie/Desktop/Roddie/Chatting-System-by-Socket-Programming/ChatSystem/src/main/resources/newfile");
+                    InputStream inputStream = socket.getInputStream();
+                    byte[] buffer = new byte[chunkSize];
+                    int readBytes;
+                    while ((readBytes = inputStream.read(buffer)) != -1) {
+                        fos.write(buffer, 0, readBytes);
+                    }
+                    fos.close();
+                }
+
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
