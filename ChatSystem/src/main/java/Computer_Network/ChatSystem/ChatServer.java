@@ -6,6 +6,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,13 +18,13 @@ public class ChatServer {
 
     public static void main(String[] args) {
         ServerSocket serverSocket = null;
-        ServerSocket dataSocket = null;
+        ServerSocket dataserverSocket = null;
 
 
         try{
             String hostAddress = InetAddress.getLocalHost().getHostAddress();
             serverSocket = new ServerSocket(10001);
-            dataSocket = new ServerSocket(10002);
+            dataserverSocket = new ServerSocket(10002);
             consoleLog("연결 기다림");
 
             ChatServerProcessThread chatServerProcessThread;
@@ -31,9 +32,9 @@ public class ChatServer {
             //3.요청 대기
             while(true){
                 Socket socket = serverSocket.accept();
-                new ChatServerProcessThread(socket, listwriters).start();
-                Socket datasocket = dataSocket.accept();
-                new ChatServerProcessThread2(datasocket, listwriters).start();
+                new ChatServerProcessThread(socket).start();
+                Socket datasocket = dataserverSocket.accept();
+                new ChatServerProcessThread2(datasocket).start();
                 System.out.println("new Room");
             }
 
@@ -58,35 +59,45 @@ public class ChatServer {
 class ChatServerProcessThread2 extends Thread{
     static List<String> nickname_list= new ArrayList<>();
     private Socket socket= null;
-    List<PrintWriter> listWriters = new ArrayList<>();
+    static List<Socket> socketlist = new ArrayList<>();
     private String nickname;
 
 
-    public ChatServerProcessThread2(Socket socket, List<PrintWriter> listWriters){
+    public ChatServerProcessThread2(Socket socket){
         this.socket = socket;
-        this.listWriters = listWriters;
+        socketlist.add(socket);
+        System.out.println(socketlist.size());
+
     }
 
     @Override
     public void run(){
         try{
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
-            PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(),StandardCharsets.UTF_8));
-            System.out.println(socket);
+            InputStream inputStream = socket.getInputStream();
+            OutputStream outputStream = socket.getOutputStream();
+            //FileOutputStream fos = new FileOutputStream("/Users/roddie/Desktop/Roddie/Chatting-System-by-Socket-Programming/ChatSystem/src/main/resources/newfile.txt");
+            System.out.println("ㅎㅇ");
+            byte[] buffer = new byte[1024];
+            int readBytes;
             while(true){
-                String request = bufferedReader.readLine();
-                System.out.println("여기어때");
-                System.out.println(request);
-                if(request ==null){
-                    doQuit(printWriter);
-                    break;
+                readBytes = inputStream.read(buffer);
+                if (readBytes != -1) {
+                    FileOutputStream fos = new FileOutputStream("/Users/roddie/Desktop/Roddie/Chatting-System-by-Socket-Programming/ChatSystem/src/main/resources/newfile2");
+                    fos.write(buffer, 0, readBytes);
+                    fos.close();
+                    System.out.println(socketlist.size());
+                    for(Socket socket : socketlist){
+                        OutputStream outputStream2 = socket.getOutputStream();
+                        outputStream2.write(buffer,0,readBytes);
+                    }
+
                 }
-                System.out.println("data : "+ request);
             }
         }catch(IOException e){
-            consoleLog(nickname + "님이 채팅방을 나갔습니다");
+            consoleLog(nickname + "님이 채팅방을 나갔습니다2");
         }
     }
+    /*
     private void doMessage(String data){
         broadcast(data);
     }
@@ -115,9 +126,8 @@ class ChatServerProcessThread2 extends Thread{
         addWriter(writer);
     }
 
-    private void addWriter(PrintWriter writer){
-            listWriters.add(writer);
-        }
+     */
+
 
     public static void consoleLog(String log){
         System.out.println(log);
@@ -128,13 +138,12 @@ class ChatServerProcessThread2 extends Thread{
 class ChatServerProcessThread extends Thread{
     static List<String> nickname_list= new ArrayList<>();
     private Socket socket= null;
-    List<PrintWriter> listWriters = new ArrayList<>();
+    static List<PrintWriter> listWriters = new ArrayList<>();
     private String nickname;
 
 
-    public ChatServerProcessThread(Socket socket, List<PrintWriter> listWriters){
+    public ChatServerProcessThread(Socket socket){
         this.socket = socket;
-        this.listWriters = listWriters;
     }
 
     @Override
@@ -183,7 +192,7 @@ class ChatServerProcessThread extends Thread{
     }
 
     private void removeWriter(PrintWriter writer){
-        synchronized (listWriters){ /// synchrnoized가 뭐야???
+        synchronized (listWriters){
             listWriters.remove(writer);
         }
     }

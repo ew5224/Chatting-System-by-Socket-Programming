@@ -36,8 +36,7 @@ public class ChatService {
     }
 
     public void sendFile(ChatClient chatClient,MultipartFile file) throws IOException {
-        Socket socket = new Socket();
-        socket.connect(new InetSocketAddress(chatClient.getSERVER_IP(), 10002));
+        Socket socket = chatClient.getDatasocket();
         byte[] bytes = file.getBytes();
         System.out.println(bytes.length);
         String rootPath = System.getProperty("catalina.home");
@@ -50,8 +49,6 @@ public class ChatService {
                 + File.separator + "sendfile");
         OutputStream outputStream = socket.getOutputStream();
         outputStream.write(bytes);
-        outputStream.close();
-        socket.close();
         System.out.println("데이터 전송 완료");
     }
 

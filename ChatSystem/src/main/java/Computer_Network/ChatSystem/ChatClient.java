@@ -33,6 +33,12 @@ public class ChatClient {
     private int clientid;
     private List<String> chatDAO = new ArrayList<String>();
 
+    public Socket getDatasocket() {
+        return datasocket;
+    }
+
+    private Socket datasocket;
+
     public Socket getSocket() {
         return socket;
     }
@@ -51,10 +57,10 @@ public class ChatClient {
     public void connect() throws IOException {
         ///socket = new Socket();
         socket = new Socket();
-        Socket datasocket = new Socket();
+        datasocket = new Socket();
         try {
             socket.connect(new InetSocketAddress(SERVER_IP, 10001));
-            //datasocket.connect(new InetSocketAddress(SERVER_IP, 10002));
+            datasocket.connect(new InetSocketAddress(SERVER_IP, 10002));
             consoleLog("채팅방에 입장하셨습니다.");
             PrintWriter pw = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8), true);
             String request = "join:" + name + "\r\n";
@@ -88,7 +94,6 @@ public class ChatClient {
         ChatClientReceiveThread(Socket socket) {
             this.socket = socket;
         }
-
         public void run() {
             try {
                 BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
@@ -115,14 +120,14 @@ public class ChatClient {
         public void run() {
             try {
                 while(true) {
-                    FileOutputStream fos = new FileOutputStream("/Users/roddie/Desktop/Roddie/Chatting-System-by-Socket-Programming/ChatSystem/src/main/resources/newfile");
                     InputStream inputStream = socket.getInputStream();
                     byte[] buffer = new byte[chunkSize];
                     int readBytes;
                     while ((readBytes = inputStream.read(buffer)) != -1) {
+                        FileOutputStream fos = new FileOutputStream("/Users/roddie/Desktop/Roddie/Chatting-System-by-Socket-Programming/clientfile"+name);
                         fos.write(buffer, 0, readBytes);
                     }
-                    fos.close();
+                    ///fos.close();
                 }
 
             } catch (IOException e) {
