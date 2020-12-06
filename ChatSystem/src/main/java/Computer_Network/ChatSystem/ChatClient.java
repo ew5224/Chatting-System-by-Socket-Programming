@@ -51,14 +51,16 @@ public class ChatClient {
     public void connect() throws IOException {
         ///socket = new Socket();
         socket = new Socket();
+        Socket datasocket = new Socket();
         try {
             socket.connect(new InetSocketAddress(SERVER_IP, 10001));
+            //datasocket.connect(new InetSocketAddress(SERVER_IP, 10002));
             consoleLog("채팅방에 입장하셨습니다.");
             PrintWriter pw = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8), true);
             String request = "join:" + name + "\r\n";
             pw.println(request);
             new ChatClientReceiveThread(socket).start();
-            new ChatClientFileReceiveThread(socket).start();
+            new ChatClientFileReceiveThread(datasocket).start();
 
         } catch (IOException e) {
             e.printStackTrace();

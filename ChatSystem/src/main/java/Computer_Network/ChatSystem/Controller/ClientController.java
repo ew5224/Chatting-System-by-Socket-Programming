@@ -64,7 +64,7 @@ public class ClientController {
             return "redirect:/clientpage/"+chatclientid;
         }
         String context = messageForm.getContext();
-        context = "message:"+context;
+        context = "message:"+chatclient.getName()+">>"+context;
         chatService.sendMessage(chatclient, context);
         List<String> chatlist = chatclient.getChatDAO();
         model.addAttribute("chatlist", chatlist);

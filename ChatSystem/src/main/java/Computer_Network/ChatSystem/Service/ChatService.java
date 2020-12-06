@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -22,7 +23,7 @@ public class ChatService {
         this.chatRepository = chatRepository;
     }
 
-    public void sendMessage(ChatClient chatClient, String context){
+    public void sendMessage(ChatClient chatClient, String context) throws IOException {
         Socket socket = chatClient.getSocket();
         PrintWriter pw;
         try{
@@ -35,19 +36,23 @@ public class ChatService {
     }
 
     public void sendFile(ChatClient chatClient,MultipartFile file) throws IOException {
+        Socket socket = new Socket();
+        socket.connect(new InetSocketAddress(chatClient.getSERVER_IP(), 10002));
         byte[] bytes = file.getBytes();
+        System.out.println(bytes.length);
         String rootPath = System.getProperty("catalina.home");
         File dir = new File(rootPath + File.separator + "tmpFiles");
         if (!dir.exists())
             dir.mkdirs();
 
         // Create the file on server
-        Socket socket = chatClient.getSocket();
         File serverFile = new File(dir.getAbsolutePath()
                 + File.separator + "sendfile");
         OutputStream outputStream = socket.getOutputStream();
         outputStream.write(bytes);
-
+        outputStream.close();
+        socket.close();
+        System.out.println("데이터 전송 완료");
     }
 
     public ArrayList<String> getchatlist(){
