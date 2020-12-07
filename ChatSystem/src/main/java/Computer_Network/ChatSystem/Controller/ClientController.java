@@ -12,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.io.*;
 import java.net.Socket;
@@ -26,25 +27,40 @@ public class ClientController {
 
 
     private final ChatService chatService;
+    private int chatclientidmake=0;
     private int chatclientid=0;
     ///private String name;
 
-    @GetMapping("/home")
+    @RequestMapping("/home")
     public String createLoginForm(Model model){
         model.addAttribute("form", new ClientLoginForm());
         return "ClientHome";
     }
 
     @PostMapping("/home")
-    public String postMessage(ClientLoginForm clientLoginForm, Model model) throws IOException {
-        chatclientid+=100;
-        ChatClient chatclient = new ChatClient(clientLoginForm.getName(), clientLoginForm.getPassword(), clientLoginForm.getServerIP(), clientLoginForm.getPort(),chatclientid);
-        String name = chatclient.getName();
-        chatclient.connect();
-        System.out.println("연결 소켓 : " + chatclient.getSocket());
-        chatService.join(chatclient);
-        model.addAttribute("name",clientLoginForm.getName());
-        return "redirect:/clientpage/"+chatclientid;
+    public String postMessage(ClientLoginForm clientLoginForm, Model model, PasswordForm passwordForm) throws IOException {
+        ChatClient chatClient = chatService.login(passwordForm.getId(), passwordForm.getPassword());
+        if(chatClient==null){
+            if(chatService.duplicatecheck(clientLoginForm.getName())){
+                model.addAttribute("password", new PasswordForm());
+                return "alert";
+            }
+            chatclientidmake+=100;
+            ChatClient chatclient = new ChatClient(clientLoginForm.getName(), clientLoginForm.getPassword(), clientLoginForm.getServerIP(), clientLoginForm.getPort(),chatclientidmake);
+            chatclient.connect();
+            System.out.println("연결 소켓 : " + chatclient.getSocket());
+            chatService.join(chatclient);
+            model.addAttribute("name",clientLoginForm.getName());
+            return "redirect:/clientpage/"+chatclientidmake;
+        }
+        if(chatClient.getName()!=null){
+            chatclientid = chatClient.getClientid();
+            return "redirect:/clientpage/"+chatclientid;
+        }
+        if(chatClient.getName()==null){
+            return "notcorrect";
+            }
+        return null;
     }
 
     @RequestMapping("/clientpage/{chatclientid}")
@@ -72,10 +88,13 @@ public class ClientController {
     }
 
 
-    @GetMapping("/logout")
-    public String Logout(Model model){
-        ///ChatClient chatclient = chatService.findOne(chatclientid);
-        ///chatService.sendMessage("quit");
+    @RequestMapping("/logout/{chatclientid}")
+    public String Logout(@PathVariable String chatclientid) throws IOException {
+        System.out.println("들어왔음");
+        ChatClient chatclient = chatService.findOne(chatclientid);
+        chatService.logout(chatclient);
+        chatService.sendMessage(chatclient, "quit");
         return "redirect:/home";
     }
+
 }

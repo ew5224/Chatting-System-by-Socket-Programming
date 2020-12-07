@@ -16,8 +16,8 @@ import java.util.Map;
 @Getter
 @Setter
 public class ChatRepository {
-    private String id;
-    private String password;
+    private ArrayList<String> idlist = new ArrayList<>();
+    private ArrayList<String> pwlist = new ArrayList<>();
     private ArrayList<String> chatlist = new ArrayList<String>();
     private ArrayList<ChatClient> clientlist = new ArrayList<ChatClient>();
 

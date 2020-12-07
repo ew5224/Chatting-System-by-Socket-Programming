@@ -35,7 +35,7 @@ public class ChatServer {
                 new ChatServerProcessThread(socket).start();
                 Socket datasocket = dataserverSocket.accept();
                 new ChatServerProcessThread2(datasocket).start();
-                System.out.println("new Room");
+                System.out.println("새로운 사용자 접속");
             }
 
         }catch(Exception e){
@@ -75,8 +75,6 @@ class ChatServerProcessThread2 extends Thread{
         try{
             InputStream inputStream = socket.getInputStream();
             OutputStream outputStream = socket.getOutputStream();
-            //FileOutputStream fos = new FileOutputStream("/Users/roddie/Desktop/Roddie/Chatting-System-by-Socket-Programming/ChatSystem/src/main/resources/newfile.txt");
-            System.out.println("ㅎㅇ");
             byte[] buffer = new byte[1024];
             int readBytes;
             while(true){
@@ -90,45 +88,12 @@ class ChatServerProcessThread2 extends Thread{
                         OutputStream outputStream2 = socket.getOutputStream();
                         outputStream2.write(buffer,0,readBytes);
                     }
-
                 }
             }
         }catch(IOException e){
-            consoleLog(nickname + "님이 채팅방을 나갔습니다2");
+            e.printStackTrace();
         }
     }
-    /*
-    private void doMessage(String data){
-        broadcast(data);
-    }
-    private void doQuit(PrintWriter writer){
-        removeWriter(writer);
-        String data = this.nickname + "님이 퇴장하였습니다";
-        broadcast(data);
-    }
-    private void removeWriter(PrintWriter writer){
-        synchronized (listWriters){ /// synchrnoized가 뭐야???
-            listWriters.remove(writer);
-        }
-    }
-    private void broadcast(String data) {
-        synchronized (listWriters) {
-            for (PrintWriter writer : listWriters) {
-                writer.println(data);
-                writer.flush();
-            }
-        }
-    }
-    private void doJoin(String nickname, PrintWriter writer){
-        nickname_list.add(nickname);
-        String data = nickname + "님이 입장하셨습니다";
-        broadcast(data);
-        addWriter(writer);
-    }
-
-     */
-
-
     public static void consoleLog(String log){
         System.out.println(log);
     }
@@ -161,23 +126,20 @@ class ChatServerProcessThread extends Thread{
                 }
 
                 String[] tokens = request.split(":");
-                ///System.out.println(request);
+                System.out.println(request);
                 if("join".equals(tokens[0])){
-                    System.out.println("join run");
                     nickname =tokens[1];
                     doJoin(tokens[1], printWriter);
                 }
                 else if("message".equals(tokens[0])){
-                    System.out.println("message run");
                     doMessage(tokens[1]);
                 }
                 else if("quit".equals(tokens[0])) {
-                    System.out.println("quit run");
                     doQuit(printWriter);
                 }
             }
         }catch(IOException e){
-            consoleLog(nickname + "님이 채팅방을 나갔습니다");
+            ///consoleLog(nickname + "님이 채팅방을 나갔습니다");
         }
     }
 

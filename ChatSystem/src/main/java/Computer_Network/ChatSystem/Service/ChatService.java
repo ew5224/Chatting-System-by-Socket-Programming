@@ -35,6 +35,29 @@ public class ChatService {
         }
     }
 
+    public boolean duplicatecheck(String name){
+         if(chatRepository.getIdlist().contains(name)){
+             return true;
+         }
+         else{
+             return false;
+         }
+    }
+    public ChatClient login(String id, String password){
+        if(id==null){
+            return null;
+        }
+        if(chatRepository.getIdlist().indexOf(id)==-1){
+            return new ChatClient();
+        }
+        if(chatRepository.getPwlist().get(chatRepository.getIdlist().indexOf(id)).equals(password)){
+            return findbyName(id);
+        }
+        else{
+            return new ChatClient();
+        }
+    }
+
     public void sendFile(ChatClient chatClient,MultipartFile file) throws IOException {
         Socket socket = chatClient.getDatasocket();
         byte[] bytes = file.getBytes();
@@ -52,26 +75,37 @@ public class ChatService {
         System.out.println("데이터 전송 완료");
     }
 
-    public ArrayList<String> getchatlist(){
-        return chatRepository.getChatlist();
-    }
-
     public ArrayList<ChatClient> getclientlist(){
         return chatRepository.getClientlist();
     }
 
     public void join(ChatClient chatClient){
         chatRepository.getClientlist().add(chatClient);
+        chatRepository.getIdlist().add(chatClient.getName());
+        chatRepository.getPwlist().add(chatClient.getPassword());
     }
 
     public ChatClient findOne(String name) {
         for (ChatClient chatClient : chatRepository.getClientlist()) {
-            if (chatClient.getClientid()==(Integer.parseInt(name))) {
+            if (chatClient.getClientid() == (Integer.parseInt(name))) {
                 return chatClient;
             }
         }
         return null;
+    }
+    public ChatClient findbyName(String name){
+        for (ChatClient chatClient : chatRepository.getClientlist()) {
+            if (chatClient.getName().equals(name)) {
+                return chatClient;
             }
+        }
+        return null;
+    }
+    public void logout(ChatClient chatclient){
+        chatRepository.getIdlist().remove(chatclient.getName());
+        chatRepository.getPwlist().remove(chatclient.getPassword());
+    }
+
 }
 
 

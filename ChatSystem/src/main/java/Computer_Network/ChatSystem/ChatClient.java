@@ -26,7 +26,7 @@ import java.util.Scanner;
 @RequiredArgsConstructor
 public class ChatClient {
 
-    private String name;  //TODO 안 입력했을 때 튕겨나오게
+    private String name;
     private String SERVER_IP;
     private int PORT;
     private String password;
@@ -99,7 +99,7 @@ public class ChatClient {
                 BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
                 while (true) {
                     String msg = br.readLine();
-                    System.out.println(msg);
+                    ///System.out.println(msg);
                     chatDAO.add(msg);
                 }
             } catch (IOException e) {
@@ -123,9 +123,11 @@ public class ChatClient {
                     InputStream inputStream = socket.getInputStream();
                     byte[] buffer = new byte[chunkSize];
                     int readBytes;
+                    int file_num=1;
                     while ((readBytes = inputStream.read(buffer)) != -1) {
-                        FileOutputStream fos = new FileOutputStream("/Users/roddie/Desktop/Roddie/Chatting-System-by-Socket-Programming/clientfile"+name);
+                        FileOutputStream fos = new FileOutputStream("/Users/roddie/Desktop/file_"+name+"_"+file_num);
                         fos.write(buffer, 0, readBytes);
+                        file_num+=1;
                     }
                     ///fos.close();
                 }
