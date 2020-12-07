@@ -31,13 +31,13 @@ public class ClientController {
     private int chatclientid=0;
     ///private String name;
 
-    @RequestMapping("/home")
+    @RequestMapping("home")
     public String createLoginForm(Model model){
         model.addAttribute("form", new ClientLoginForm());
         return "ClientHome";
     }
 
-    @PostMapping("/home")
+    @PostMapping("home")
     public String postMessage(ClientLoginForm clientLoginForm, Model model, PasswordForm passwordForm) throws IOException {
         ChatClient chatClient = chatService.login(passwordForm.getId(), passwordForm.getPassword());
         if(chatClient==null){
@@ -63,7 +63,7 @@ public class ClientController {
         return null;
     }
 
-    @RequestMapping("/clientpage/{chatclientid}")
+    @RequestMapping("clientpage/{chatclientid}")
     public String createChatPage(Model model, @PathVariable String chatclientid) throws IOException {
         ChatClient chatclient = chatService.findOne(chatclientid);
         model.addAttribute("form", new MessageForm());
@@ -72,7 +72,7 @@ public class ClientController {
         return "clientchatpage";
     }
 
-    @PostMapping("/clientpage/{chatclientid}")  ///TODO 채팅화면 + 파일전송 + 로그아웃
+    @PostMapping("clientpage/{chatclientid}")  ///TODO 채팅화면 + 파일전송 + 로그아웃
     public String sendMessage(@RequestParam("file") MultipartFile file,MessageForm messageForm, Model model, @PathVariable String chatclientid) throws IOException {
         ChatClient chatclient = chatService.findOne(chatclientid);
         if(file.getSize()!=0){
@@ -88,7 +88,7 @@ public class ClientController {
     }
 
 
-    @RequestMapping("/logout/{chatclientid}")
+    @RequestMapping("logout/{chatclientid}")
     public String Logout(@PathVariable String chatclientid) throws IOException {
         System.out.println("들어왔음");
         ChatClient chatclient = chatService.findOne(chatclientid);

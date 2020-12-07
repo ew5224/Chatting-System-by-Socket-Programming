@@ -125,7 +125,7 @@ public class ChatClient {
                     int readBytes;
                     int file_num=1;
                     while ((readBytes = inputStream.read(buffer)) != -1) {
-                        FileOutputStream fos = new FileOutputStream("/Users/roddie/Desktop/file_"+name+"_"+file_num);
+                        FileOutputStream fos = new FileOutputStream("./file_"+name+"_"+file_num);
                         fos.write(buffer, 0, readBytes);
                         file_num+=1;
                     }

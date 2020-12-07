@@ -66,8 +66,6 @@ class ChatServerProcessThread2 extends Thread{
     public ChatServerProcessThread2(Socket socket){
         this.socket = socket;
         socketlist.add(socket);
-        System.out.println(socketlist.size());
-
     }
 
     @Override
@@ -83,7 +81,6 @@ class ChatServerProcessThread2 extends Thread{
                     FileOutputStream fos = new FileOutputStream("/Users/roddie/Desktop/Roddie/Chatting-System-by-Socket-Programming/ChatSystem/src/main/resources/newfile2");
                     fos.write(buffer, 0, readBytes);
                     fos.close();
-                    System.out.println(socketlist.size());
                     for(Socket socket : socketlist){
                         OutputStream outputStream2 = socket.getOutputStream();
                         outputStream2.write(buffer,0,readBytes);
@@ -120,7 +117,7 @@ class ChatServerProcessThread extends Thread{
             while(true){
                 String request = bufferedReader.readLine();
                 if(request ==null){
-                    consoleLog("클라이언로부터 연결 끊김");
+                    consoleLog("클라이언트로부터 연결 끊김");
                     doQuit(printWriter);
                     break;
                 }

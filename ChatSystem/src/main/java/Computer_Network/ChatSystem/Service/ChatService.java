@@ -62,14 +62,6 @@ public class ChatService {
         Socket socket = chatClient.getDatasocket();
         byte[] bytes = file.getBytes();
         System.out.println(bytes.length);
-        String rootPath = System.getProperty("catalina.home");
-        File dir = new File(rootPath + File.separator + "tmpFiles");
-        if (!dir.exists())
-            dir.mkdirs();
-
-        // Create the file on server
-        File serverFile = new File(dir.getAbsolutePath()
-                + File.separator + "sendfile");
         OutputStream outputStream = socket.getOutputStream();
         outputStream.write(bytes);
         System.out.println("데이터 전송 완료");

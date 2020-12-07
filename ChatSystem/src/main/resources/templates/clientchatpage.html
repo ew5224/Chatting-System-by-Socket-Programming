@@ -1,5 +1,7 @@
 <!DOCTYPE HTML>
-<html xmlns:th="http://www.thymeleaf.org"> <head th:replace="fragments/header :: header" /> <body>
+<html xmlns:th="http://www.thymeleaf.org"> <head th:replace="fragments/header :: header" />
+<head><meta http-equiv="refresh" content="7"></head>
+<body>
 <div class="container">
     <div th:replace="fragments/bodyHeader :: bodyHeader"/>
     <form th:action="|/clientpage/${chatclientid}|" th:object="${form}" method="post" enctype="multipart/form-data"> <div class="form-group">
